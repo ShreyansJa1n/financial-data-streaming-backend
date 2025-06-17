@@ -1,9 +1,9 @@
 from fastapi import APIRouter, FastAPI
 
-latest_router = APIRouter()
+router = APIRouter()
 
 
-@latest_router.get("/latest")
+@router.get("/latest")
 def get_latest_price():
     return {
         "symbol": "AAPL",
