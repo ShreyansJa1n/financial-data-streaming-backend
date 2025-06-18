@@ -32,7 +32,7 @@ services:
       - postgres
       - redis
     environment:
-      DATABASE_URL: postgres://blockhouse:blockhouse@postgres:5432/blockhouse_db
+      DATABASE_URL: postgresql://blockhouse:blockhouse@postgres:5432/blockhouse_db
       REDIS_URL: redis://redis:6379/0
       ALPHA_VANTAGE_API_KEY: BEEJLJ3UFZCINBRW
     command: "make -C ./scripts run_development"
@@ -43,6 +43,7 @@ services:
       - ./app/schemas/:/app/schemas
       - ./app/services/:/app/services
       - ./scripts/:/app/scripts
+      - ./requirements/:/app/requirements
 
 volumes:
   postgres_data:
