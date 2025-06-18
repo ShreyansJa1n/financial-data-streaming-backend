@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     ALPHA_VANTAGE_API_KEY: str = Field(..., env="ALPHA_VANTAGE_API_KEY")
 
     class Config:
-        env_file = ".env"
+        env_file = "/app/.env"
         env_file_encoding = "utf-8"
         
         
