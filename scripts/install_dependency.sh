@@ -28,7 +28,7 @@ else
     exit 1
 fi
 
-pip freeze > requirements.txt
+pip freeze > ../requirements/requirements.txt
 echo "Updated requirements.txt with installed packages."
 # Deactivate the virtual environment
 deactivate

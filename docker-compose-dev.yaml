@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    environment:
+      POSTGRES_USER: blockhouse
+      POSTGRES_PASSWORD: blockhouse
+      POSTGRES_DB: blockhouse_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  web-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: web_app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      DATABASE_URL: postgres://blockhouse:blockhouse@postgres:5432/blockhouse_db
+      REDIS_URL: redis://redis:6379/0
+      ALPHA_VANTAGE_API_KEY: BEEJLJ3UFZCINBRW
+    command: "make -C ./scripts run_development"
+    volumes:
+      - ./app/api/:/app/api
+      - ./app/core/:/app/core
+      - ./app/models/:/app/models
+      - ./app/schemas/:/app/schemas
+      - ./app/services/:/app/services
+      - ./scripts/:/app/scripts
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
