@@ -1,9 +1,9 @@
-from fastapi import APIRouter, FastAPI
+from fastapi import APIRouter
 
 router = APIRouter()
 
 
-@router.post("/poll", status_code=202)
+@router.post("/", status_code=202)
 def create_poll(poll: dict):
     print(poll)
     return {
