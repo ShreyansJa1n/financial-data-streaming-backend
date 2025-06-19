@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from app.api.api import api_router
 from app.services.Redis import RedisService
-from app.services.Database import engine, get_db
+from app.services.Database import engine
 import app.models as models
 from contextlib import asynccontextmanager
 

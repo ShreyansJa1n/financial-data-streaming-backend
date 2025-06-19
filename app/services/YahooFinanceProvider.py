@@ -6,13 +6,11 @@ import yfinance as yf
 class YahooFinanceProvider(ProviderInterface):
     def fetch_raw_data(self, symbol: str) -> Dict[str, Any]:
         ticker = yf.Ticker(symbol)
-        hist = ticker.history(period="1d")
-        return hist.to_dict()
-    
+        hist = ticker.get_info()
+        return hist
+
     def extract_price(self, raw_data: Dict[str, Any]) -> Dict[str, Any]:
-        close_prices = raw_data['Close']
-        latest_timestamp = max(close_prices.keys())
         return {
-            "price": close_prices[latest_timestamp],
-            "timestamp": latest_timestamp,
+            "price": raw_data.get("currentPrice") or raw_data.get("regularMarketPrice"),
+            "timestamp": raw_data.get("regularMarketTime"),
         }

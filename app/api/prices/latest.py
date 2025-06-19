@@ -32,7 +32,7 @@ async def get_latest_price(
         f"latest_price:{symbol}:{provider}"
     )
     if cached_price:
-        print(f"Cache hit for {symbol} from {provider}, returning cached data {cached_price}")
+        
         return LatestPrice(
             symbol=cached_price["symbol"],
             price=cached_price["price"],
@@ -40,11 +40,11 @@ async def get_latest_price(
             timestamp=cached_price["timestamp"],
         )
         
-    print(f"Cache miss for {symbol} from {provider}, fetching new data")
+    
 
     raw_data = provider_instance.fetch_raw_data(symbol)
     price_data = provider_instance.extract_price(raw_data)
-    print(f"Storing raw data in database: {raw_data}")    
+        
     db_raw_data = models.RawPrice(
         symbol=symbol,
         price=price_data.get("price"),
@@ -55,13 +55,23 @@ async def get_latest_price(
     db.add(db_raw_data)
     db.commit()
     db.refresh(db_raw_data)
-
+    
     returned_data = LatestPrice(
         symbol=symbol,
         price=price_data.get("price"),
         provider=provider,
         timestamp=price_data.get("timestamp"),
     )
+    
+    db_price_point = models.PricePoints(
+        symbol=symbol,
+        price=price_data.get("price"),
+        source=provider,
+        timestamp=returned_data.timestamp,
+    )
+    db.add(db_price_point)
+    db.commit()
+    db.refresh(db_price_point)
 
     await request.app.state.redis_service.set(
         f"latest_price:{symbol}:{provider}",
@@ -69,7 +79,7 @@ async def get_latest_price(
             "symbol": symbol,
             "price": price_data.get("price"),
             "provider": provider,
-            "timestamp": price_data.get("timestamp"),
+            "timestamp": returned_data.timestamp,
         },
         expire=60,
     )
