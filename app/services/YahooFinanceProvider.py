@@ -6,7 +6,7 @@ import yfinance as yf
 class YahooFinanceProvider(ProviderInterface):
     def fetch_raw_data(self, symbol: str) -> Dict[str, Any]:
         ticker = yf.Ticker(symbol)
-        hist = ticker.history(period="1d", interval="1m")
+        hist = ticker.history(period="1d")
         return hist.to_dict()
     
     def extract_price(self, raw_data: Dict[str, Any]) -> Dict[str, Any]:

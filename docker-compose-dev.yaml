@@ -35,6 +35,7 @@ services:
       DATABASE_URL: postgresql://blockhouse:blockhouse@postgres:5432/blockhouse_db
       REDIS_URL: redis://redis:6379/0
       ALPHA_VANTAGE_API_KEY: BEEJLJ3UFZCINBRW
+      ENVIRONMENT: development
     command: "make -C ./scripts run_development"
     volumes:
       - ./app/api/:/app/api
@@ -44,6 +45,14 @@ services:
       - ./app/services/:/app/services
       - ./scripts/:/app/scripts
       - ./requirements/:/app/requirements
+
+  adminer:
+      image: adminer
+      hostname: adminer
+      container_name: adminer
+      restart: always
+      ports:
+          - 8080:8080
 
 volumes:
   postgres_data:

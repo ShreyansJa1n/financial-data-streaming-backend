@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Request
-
+from fastapi import APIRouter, Depends, Request
+from sqlalchemy.orm import Session
 from app.services.YahooFinanceProvider import YahooFinanceProvider
 from app.services.AlphaVantageProvider import AlphaVantageProvider
 from app.services.Database import get_db
 from app.schemas.LatestPrice import LatestPrice
+from app import models
 
 router = APIRouter()
 
@@ -20,7 +21,7 @@ providers = {
     summary="Get latest price for a symbol",
 )
 async def get_latest_price(
-    symbol: str, provider: str = "alpha_vantage", request: Request = None
+    symbol: str, provider: str = "alpha_vantage", request: Request = None, db: Session = Depends(get_db)
 ):
     provider_instance = providers.get(provider)
     if not provider_instance:
@@ -43,6 +44,17 @@ async def get_latest_price(
 
     raw_data = provider_instance.fetch_raw_data(symbol)
     price_data = provider_instance.extract_price(raw_data)
+    print(f"Storing raw data in database: {raw_data}")    
+    db_raw_data = models.RawPrice(
+        symbol=symbol,
+        price=price_data.get("price"),
+        source=provider,
+        raw_data=raw_data,
+    )
+
+    db.add(db_raw_data)
+    db.commit()
+    db.refresh(db_raw_data)
 
     returned_data = LatestPrice(
         symbol=symbol,
