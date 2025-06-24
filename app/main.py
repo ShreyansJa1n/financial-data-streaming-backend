@@ -8,10 +8,6 @@ from contextlib import asynccontextmanager
 from sqlalchemy import inspect
 
 from confluent_kafka.admin import AdminClient, NewTopic
-from app.services.PriceEventConsumer import (
-    start_price_event_consumer,
-    stop_price_event_consumer,
-)
 
 # Initialize Redis service
 redis_service = RedisService()
@@ -57,12 +53,12 @@ async def lifespan(app):
         print("Kafka topics created successfully.")
 
     print("Starting price event consumer...")
-    start_price_event_consumer()
+    #TODO: Implement the actual consumer logic
 
     yield
     await redis_service.disconnect()
     print("Stopping price event consumer...")
-    stop_price_event_consumer()
+    #TODO: Implement the actual consumer shutdown logic
 
 
 app = FastAPI(lifespan=lifespan)

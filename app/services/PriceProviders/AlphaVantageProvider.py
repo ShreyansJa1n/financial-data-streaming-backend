@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Any, Dict
 import requests
 from app.core.config import settings
-from app.services.ProviderInterface import ProviderInterface
+from app.services.PriceProviders.ProviderInterface import ProviderInterface
 
 
 class AlphaVantageProvider(ProviderInterface):

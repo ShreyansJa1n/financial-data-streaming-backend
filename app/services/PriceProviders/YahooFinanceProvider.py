@@ -1,5 +1,5 @@
 from typing import Dict, Any
-from app.services.ProviderInterface import ProviderInterface
+from app.services.PriceProviders.ProviderInterface import ProviderInterface
 from app.core.config import settings
 import yfinance as yf
 

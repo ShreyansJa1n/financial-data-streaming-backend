@@ -1,6 +1,7 @@
 from app import models
-from app.services import AlphaVantageProvider, YahooFinanceProvider
+from app.services.PriceProviders import YahooFinanceProvider
 from app.services.Database import get_db
+from app.services.PriceProviders import AlphaVantageProvider
 from app.services.Redis import RedisService
 
 
