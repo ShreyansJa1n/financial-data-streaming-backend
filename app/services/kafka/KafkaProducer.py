@@ -1,22 +1,25 @@
-from confluent_kafka import KafkaProducer
+from confluent_kafka import Producer
 import json
+import logging
 from app.core.config import settings
 
-class KafkaProducerService:
-    def __init__(self):
-        self.producer = KafkaProducer(
-            bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS,
-            value_serializer=lambda v: json.dumps(v).encode("utf-8"),
-        )
-        
-    def _serialize_message(self, message: dict) -> bytes:
-        return json.dumps(message).encode("utf-8")
+producer = Producer({
+    'bootstrap.servers': settings.KAFKA_BOOTSTRAP_SERVERS
+})
 
-    def send_message(self, topic: str, message: dict):
-        try:
-            serialized_message = self._serialize_message(message)
-            self.producer.send(topic, value=serialized_message)
-            self.producer.flush()
-            print(f"Message sent to topic {topic}: {message}")
-        except Exception as e:
-            print(f"Failed to send message to topic {topic}: {e}")
+def delivery_report(err, msg):
+    if err is not None:
+        logging.error(f"Delivery failed: {err}")
+    else:
+        logging.info(f"Message delivered to {msg.topic()} [{msg.partition()}]")
+
+def publish_price_event(event: dict):
+    try:
+        producer.produce(
+            settings.KAFKA_PRICE_TOPIC,
+            value=json.dumps(event).encode('utf-8'),
+            callback=delivery_report
+        )
+        producer.poll(0)
+    except Exception as e:
+        logging.error(f"Kafka publish error: {e}")

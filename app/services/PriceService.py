@@ -1,8 +1,8 @@
 from app import models
 from app.services.PriceProviders import YahooFinanceProvider
-from app.services.Database import get_db
 from app.services.PriceProviders import AlphaVantageProvider
-from app.services.Redis import RedisService
+from app.services.kafka.KafkaProducer import publish_price_event
+import uuid
 
 
 class PriceService:
@@ -30,6 +30,7 @@ class PriceService:
         
         # Store raw data in database
         db_raw_data = models.RawPrice(
+            id = uuid.uuid4(),
             symbol=symbol,
             price=price_data.get("price"),
             source=provider,
@@ -42,6 +43,7 @@ class PriceService:
         
         # Create and store price point in database
         db_price_point = models.PricePoints(
+            id = uuid.uuid4(),
             symbol=symbol,
             price=price_data.get("price"),
             source=provider,
@@ -59,6 +61,16 @@ class PriceService:
             "provider": provider,
             "timestamp": price_data.get("timestamp"),
         }
+        
+        price_event = {
+            "symbol": symbol,
+            "price": price_data.get("price"),
+            "timestamp": price_data.get("timestamp"),
+            "source": provider,
+            "raw_response_id": str(db_raw_data.id)
+        }
+        
+        publish_price_event(price_event)
         
         # Store in Redis cache
         await self.redis.set(f"latest_price:{symbol}:{provider}", response_data)

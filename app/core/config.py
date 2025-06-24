@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     
     KAFKA_BOOTSTRAP_SERVERS: str = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
-    KAFKA_TOPICS: list[str] = ["price_events"]
+    KAFKA_PRICE_TOPIC: str = "price_events"
     
     ALPHA_VANTAGE_API_KEY: str = os.getenv("ALPHA_VANTAGE_API_KEY", "demo")
 
@@ -23,11 +23,9 @@ class Settings(BaseSettings):
         
 class DevelopmentSettings(Settings):
     DEBUG: bool = True
-    LOG_LEVEL: str = "DEBUG"
 
 class ProductionSettings(Settings):
     DEBUG: bool = False
-    LOG_LEVEL: str = "WARNING"
     WORKERS: int = 4
     DATABASE_POOL_SIZE: int = 20
     DATABASE_MAX_OVERFLOW: int = 30

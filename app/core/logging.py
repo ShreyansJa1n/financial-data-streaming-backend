@@ -1,0 +1,21 @@
+import logging
+from loguru import logger
+import sys
+from .config import settings
+
+class InterceptHandler(logging.Handler):
+    def emit(self, record):
+        logger_opt = logger.opt(depth=6, exception=record.exc_info)
+        logger_opt.log(record.levelname, record.getMessage())
+
+# Ensure root logger is set to INFO and propagate to loguru
+logging.basicConfig(handlers=[InterceptHandler()], level=logging.INFO, force=True)
+logger.remove()
+
+# Set the log level based on settings
+if settings.DEBUG:
+    logger.level("DEBUG", color="<blue>")
+    logger.add(sys.stdout, level="DEBUG", serialize=False, backtrace=True, diagnose=True)
+else:
+    logger.level("INFO", color="<green>")
+    logger.add(sys.stdout, level="INFO", serialize=False, backtrace=True, diagnose=True)

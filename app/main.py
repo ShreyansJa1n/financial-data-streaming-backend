@@ -6,6 +6,7 @@ import app.models as models
 from app.core.config import settings
 from contextlib import asynccontextmanager
 from sqlalchemy import inspect
+from app.core.logging import logging
 
 from confluent_kafka.admin import AdminClient, NewTopic
 
@@ -16,20 +17,20 @@ redis_service = RedisService()
 @asynccontextmanager
 async def lifespan(app):
     # Store redis_service in app state
-    print("Connecting to Redis...")
+    logging.info("Connecting to Redis...")
     app.state.redis_service = redis_service
     await redis_service.connect()
-    print("Creating database tables...")
+    logging.info("Creating database tables...")
     try:
         models.Base.metadata.create_all(bind=engine)
-        print("Tables created successfully!")
+        logging.info("Tables created successfully!")
         inspector = inspect(engine)
         tables = inspector.get_table_names()
-        print(f"Tables in database: {tables}")
+        logging.info(f"Tables in database: {tables}")
     except Exception as e:
-        print(f"Error creating tables: {e}")
+        logging.error(f"Error creating tables: {e}")
 
-    print("Creating Kafka topics...")
+    logging.info("Creating Kafka topics...")
     try:
         kafka_admin_client = AdminClient(
             {
@@ -43,21 +44,21 @@ async def lifespan(app):
         for topic, f in fs.items():
             try:
                 f.result(timeout=5)  # Wait for topic creation with timeout
-                print(f"Topic {topic} created successfully.")
+                logging.info(f"Topic {topic} created successfully.")
             except Exception as e:
-                print(f"Failed to create topic {topic}: {e}")
+                logging.error(f"Failed to create topic {topic}: {e}")
         
     except Exception as e:
-        print(f"Kafka AdminClient setup failed: {e}")
+        logging.error(f"Kafka AdminClient setup failed: {e}")
     else:
-        print("Kafka topics created successfully.")
+        logging.info("Kafka topics created successfully.")
 
-    print("Starting price event consumer...")
+    logging.info("Starting price event consumer...")
     #TODO: Implement the actual consumer logic
 
     yield
     await redis_service.disconnect()
-    print("Stopping price event consumer...")
+    logging.info("Stopping price event consumer...")
     #TODO: Implement the actual consumer shutdown logic
 
 
