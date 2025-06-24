@@ -7,11 +7,14 @@ class Settings(BaseSettings):
     PROJECT_VERSION: str = "1.0.0"
     DEBUG: bool = True
 
-    DATABASE_URL: str = Field(..., env="DATABASE_URL")
-    REDIS_URL: str = Field(..., env="REDIS_URL")
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "ostgresql://blockhouse:blockhouse@localhost:5432/blockhouse_db")
+    REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")
     ALGORITHM: str = "HS256"
     
-    ALPHA_VANTAGE_API_KEY: str = Field(..., env="ALPHA_VANTAGE_API_KEY")
+    KAFKA_BOOTSTRAP_SERVERS: str = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
+    KAFKA_TOPICS: list[str] = ["price_events"]
+    
+    ALPHA_VANTAGE_API_KEY: str = os.getenv("ALPHA_VANTAGE_API_KEY", "demo")
 
     class Config:
         env_file = "/app/.env"

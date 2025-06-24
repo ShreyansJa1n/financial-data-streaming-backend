@@ -31,6 +31,7 @@ services:
     depends_on:
       - postgres
       - redis
+      - kafka
     environment:
       DATABASE_URL: postgresql://blockhouse:blockhouse@postgres:5432/blockhouse_db
       REDIS_URL: redis://redis:6379/0
@@ -38,7 +39,8 @@ services:
       POSTGRES_USER: blockhouse
       POSTGRES_PASSWORD: blockhouse
       POSTGRES_DB: blockhouse_db
-    command: ["/wait-for-postgres.sh", "postgres", "make", "-C", "./scripts", "run_development"]
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    command: ["/wait-for-postgres.sh", "postgres", "/wait-for-kafka.sh", "kafka", "9092", "make", "-C", "./scripts", "run_development"]
     volumes:
       - ./app/api/:/app/api
       - ./app/core/:/app/core
@@ -46,6 +48,7 @@ services:
       - ./app/schemas/:/app/schemas
       - ./app/services/:/app/services
       - ./scripts/:/app/scripts
+      - ./app/main.py:/app/main.py
 
   adminer:
     image: adminer:latest
@@ -54,6 +57,30 @@ services:
       - "8080:8080"
     depends_on:
       - postgres
+
+  kafka:
+    image: bitnami/kafka:3.6.0
+    container_name: kafka
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_LISTENERS=PLAINTEXT://:9092
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    restart: always
+  zookeeper:
+    image: bitnami/zookeeper:3.8
+    container_name: zookeeper
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    ports:
+      - "2181:2181"
+    restart: always
+    
 
 volumes:
   postgres_data:

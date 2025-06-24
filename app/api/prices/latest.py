@@ -20,7 +20,7 @@ providers = {
     tags=["prices"],
     summary="Get latest price for a symbol",
 )
-async def get_latest_price(
+async def get_latest_price(\
     symbol: str, provider: str = "alpha_vantage", request: Request = None, db: Session = Depends(get_db)
 ):
     provider_instance = providers.get(provider)
@@ -83,4 +83,5 @@ async def get_latest_price(
         },
         expire=60,
     )
+    
     return returned_data
