@@ -1,4 +1,5 @@
-from app.models.market import RawPrice, PricePoints
+from app.models.market import PollingJob, RawPrice, PricePoints
+from app.schemas.price import PollRequest, PollResponse
 from app.services.PriceProviders.YahooFinanceProvider import YahooFinanceProvider
 from app.services.PriceProviders.AlphaVantageProvider import AlphaVantageProvider
 from app.services.kafka.KafkaProducer import publish_price_event
@@ -82,3 +83,18 @@ class PriceService:
         await self.redis.set(f"latest_price:{symbol}:{provider}", response_data)
         
         return response_data
+    
+    async def start_polling_job(self, req: PollRequest) -> PollResponse:
+        job_id = f"poll_{uuid.uuid4().hex[:8]}"
+        if req.provider not in self.providers:
+            raise HTTPException(404, detail="Provider does not exist.")
+        job = PollingJob(
+            id=job_id,
+            symbols=req.symbols,
+            interval=req.interval,
+            provider=req.provider,
+            status="accepted"
+        )
+        self.db.add(job)
+        await self.db.commit()
+        return PollResponse(job_id=job_id, status="accepted", config={"symbols": req.symbols, "interval": req.interval})
