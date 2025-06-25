@@ -1,18 +1,23 @@
-from app import models
-from app.services.PriceProviders import YahooFinanceProvider
-from app.services.PriceProviders import AlphaVantageProvider
+from app.models.market import RawPrice, PricePoints
+from app.services.PriceProviders.YahooFinanceProvider import YahooFinanceProvider
+from app.services.PriceProviders.AlphaVantageProvider import AlphaVantageProvider
 from app.services.kafka.KafkaProducer import publish_price_event
+from fastapi import BackgroundTasks, HTTPException
+from datetime import datetime, timezone
 import uuid
+import asyncio
+from app.core.logging import logger as logging
 
 
 class PriceService:
-    def __init__(self, db, redis):
+    def __init__(self, db, redis, background_tasks: BackgroundTasks):
         self.db = db
         self.redis = redis
         self.providers = {
             "alpha_vantage": AlphaVantageProvider(),
             "yahoo_finance": YahooFinanceProvider(),
         }
+        self.background_tasks = background_tasks
         
     async def get_latest_price(self, symbol: str, provider: str):
         # Check Redis cache first
@@ -23,13 +28,13 @@ class PriceService:
         # Fetch raw data from provider
         provider_instance = self.providers.get(provider)
         if not provider_instance:
-            return {"error": "Provider not found"}, 404
+            raise HTTPException(status_code=404, detail="Provider not found")
         
-        raw_data = provider_instance.fetch_raw_data(symbol)
-        price_data = provider_instance.extract_price(raw_data)
+        raw_data = await asyncio.to_thread(provider_instance.fetch_raw_data, symbol)
+        price_data = await asyncio.to_thread(provider_instance.extract_price, raw_data)
         
         # Store raw data in database
-        db_raw_data = models.RawPrice(
+        db_raw_data = RawPrice(
             id = uuid.uuid4(),
             symbol=symbol,
             price=price_data.get("price"),
@@ -38,39 +43,40 @@ class PriceService:
         )
         
         self.db.add(db_raw_data)
-        self.db.commit()
-        self.db.refresh(db_raw_data)
+        await self.db.commit()
+        await self.db.refresh(db_raw_data)
         
         # Create and store price point in database
-        db_price_point = models.PricePoints(
+        db_price_point = PricePoints(
             id = uuid.uuid4(),
             symbol=symbol,
             price=price_data.get("price"),
-            source=provider,
-            timestamp=price_data.get("timestamp"),
+            provider=provider,
+            timestamp=datetime.now(timezone.utc),
+            raw_response_id=str(db_raw_data.id),
         )
         
         self.db.add(db_price_point)
-        self.db.commit()
-        self.db.refresh(db_price_point)
+        await self.db.commit()
+        await self.db.refresh(db_price_point)
         
         # Prepare response data
         response_data = {
             "symbol": symbol,
             "price": price_data.get("price"),
             "provider": provider,
-            "timestamp": price_data.get("timestamp"),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
         
         price_event = {
             "symbol": symbol,
             "price": price_data.get("price"),
-            "timestamp": price_data.get("timestamp"),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "source": provider,
             "raw_response_id": str(db_raw_data.id)
         }
         
-        publish_price_event(price_event)
+        self.background_tasks.add_task(publish_price_event, price_event)
         
         # Store in Redis cache
         await self.redis.set(f"latest_price:{symbol}:{provider}", response_data)

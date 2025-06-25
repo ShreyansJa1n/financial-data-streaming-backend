@@ -1,6 +1,6 @@
 from confluent_kafka import Producer
 import json
-import logging
+from app.core.logging import logger as logging
 from app.core.config import settings
 
 producer = Producer({
@@ -20,6 +20,7 @@ def publish_price_event(event: dict):
             value=json.dumps(event).encode('utf-8'),
             callback=delivery_report
         )
+        logging.debug("Published event successfully ::DEBUG::")
         producer.poll(0)
     except Exception as e:
         logging.error(f"Kafka publish error: {e}")

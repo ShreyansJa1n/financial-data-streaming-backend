@@ -1,18 +1,28 @@
 from fastapi import FastAPI
 from app.api.api import api_router
 from app.services.Redis import RedisService
-from app.services.Database import engine
-import app.models as models
+from app.core.Database import engine
+import app.models.market as market
 from app.core.config import settings
 from contextlib import asynccontextmanager
 from sqlalchemy import inspect
-from app.core.logging import logging
+from app.core.logging import logger as logging
+from app.services.kafka.ma_consumer_runner import PriceEventConsumer
+from app.services.PollingService import PollingService
+import asyncio
+import threading
 
 from confluent_kafka.admin import AdminClient, NewTopic
 
 # Initialize Redis service
 redis_service = RedisService()
+consumer_svc = PriceEventConsumer()
 
+def run_consumer():
+    async def async_consume():
+        await consumer_svc.start_ma_consumer()
+                
+    asyncio.run(async_consume())
 
 @asynccontextmanager
 async def lifespan(app):
@@ -22,10 +32,15 @@ async def lifespan(app):
     await redis_service.connect()
     logging.info("Creating database tables...")
     try:
-        models.Base.metadata.create_all(bind=engine)
+        async with engine.begin() as conn:
+            await conn.run_sync(market.Base.metadata.create_all)
+
+            def get_tables(sync_conn):
+                inspector = inspect(sync_conn)
+                return inspector.get_table_names()
+
+            tables = await conn.run_sync(get_tables)
         logging.info("Tables created successfully!")
-        inspector = inspect(engine)
-        tables = inspector.get_table_names()
         logging.info(f"Tables in database: {tables}")
     except Exception as e:
         logging.error(f"Error creating tables: {e}")
@@ -47,19 +62,30 @@ async def lifespan(app):
                 logging.info(f"Topic {topic} created successfully.")
             except Exception as e:
                 logging.error(f"Failed to create topic {topic}: {e}")
-        
+
     except Exception as e:
         logging.error(f"Kafka AdminClient setup failed: {e}")
     else:
         logging.info("Kafka topics created successfully.")
 
     logging.info("Starting price event consumer...")
-    #TODO: Implement the actual consumer logic
+    consumer_thread = threading.Thread(target=run_consumer, daemon=True)
+    consumer_thread.start()
+
+    logging.info("Starting Polling Service")
+    polling_svc = PollingService()
+    polling_task = asyncio.create_task(polling_svc.start_polling())
+    app.state.polling_task = polling_task
+
+
 
     yield
     await redis_service.disconnect()
     logging.info("Stopping price event consumer...")
-    #TODO: Implement the actual consumer shutdown logic
+    consumer_svc.stop_ma_consumer()
+
+    polling_svc.stop_polling()
+    await polling_task
 
 
 app = FastAPI(lifespan=lifespan)
