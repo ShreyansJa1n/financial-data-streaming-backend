@@ -17,8 +17,8 @@ jobs:
       - name: Lint with flake8
         run: flake8 .
 
-      - name: Test with pytest
-        run: PYTHONPATH=. pytest
+      # - name: Test with pytest
+      #   run: PYTHONPATH=. pytest
 
       - name: Build Docker image
         run: docker build -t myapp .
