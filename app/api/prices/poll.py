@@ -7,7 +7,9 @@ from app.services.PriceService import PriceService
 router = APIRouter()
 
 
-@router.post("/", response_model=PollResponse, status_code=status.HTTP_202_ACCEPTED)
+@router.post(
+    "/", response_model=PollResponse, status_code=status.HTTP_202_ACCEPTED
+)
 async def poll_prices(
     req: PollRequest,
     background_tasks: BackgroundTasks,
@@ -15,7 +17,9 @@ async def poll_prices(
     request: Request = None,
 ):
     service = PriceService(
-        db=db, redis=request.app.state.redis_service, background_tasks=background_tasks
+        db=db,
+        redis=request.app.state.redis_service,
+        background_tasks=background_tasks,
     )
     job = await service.start_polling_job(req)
     return job

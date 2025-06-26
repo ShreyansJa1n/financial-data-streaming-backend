@@ -1,4 +1,3 @@
-from pydantic import Field
 from pydantic_settings import BaseSettings
 import os
 
@@ -9,7 +8,8 @@ class Settings(BaseSettings):
     DEBUG: bool = True
 
     DATABASE_URL: str = os.getenv(
-        "DATABASE_URL", "ostgresql://blockhouse:blockhouse@localhost:5432/blockhouse_db"
+        "DATABASE_URL",
+        "ostgresql://blockhouse:blockhouse@localhost:5432/blockhouse_db",
     )
     REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")
     ALGORITHM: str = "HS256"

@@ -7,7 +7,11 @@ from app.services.kafka.ma_consumer_runner import PriceEventConsumer
 async def test_process_price_event(monkeypatch):
     consumer = PriceEventConsumer()
     db = AsyncMock()
-    event = {"symbol": "AAPL", "price": 100, "timestamp": "2025-06-25T12:00:00Z"}
+    event = {
+        "symbol": "AAPL",
+        "price": 100,
+        "timestamp": "2025-06-25T12:00:00Z",
+    }
     db.execute.return_value.fetchall = AsyncMock(
         return_value=[(100,), (101,), (102,), (103,)]
     )

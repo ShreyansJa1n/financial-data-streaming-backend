@@ -1,6 +1,5 @@
 from typing import Dict, Any
 from app.services.PriceProviders.ProviderInterface import ProviderInterface
-from app.core.config import settings
 import yfinance as yf
 
 
@@ -12,6 +11,7 @@ class YahooFinanceProvider(ProviderInterface):
 
     def extract_price(self, raw_data: Dict[str, Any]) -> Dict[str, Any]:
         return {
-            "price": raw_data.get("currentPrice") or raw_data.get("regularMarketPrice"),
+            "price": raw_data.get("currentPrice")
+            or raw_data.get("regularMarketPrice"),
             "timestamp": raw_data.get("regularMarketTime"),
         }

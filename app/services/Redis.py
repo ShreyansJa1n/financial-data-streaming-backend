@@ -103,7 +103,9 @@ class RedisService:
         try:
             return await self.redis.exists(redis_key) > 0
         except redis.RedisError as e:
-            logger.error(f"Failed to check existence of key {key} in Redis: {e}")
+            logger.error(
+                f"Failed to check existence of key {key} in Redis: {e}"
+            )
             return False
 
     async def delete(self, key: str) -> bool:

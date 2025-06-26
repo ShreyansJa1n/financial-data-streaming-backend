@@ -58,10 +58,18 @@ class PollingJob(Base):
     interval = Column(Integer, nullable=False)
     provider = Column(String, nullable=False)
     status = Column(String, default="accepted")
-    created_at = Column(DateTime(timezone=True), default=datetime.now(timezone.utc))
+    created_at = Column(
+        DateTime(timezone=True), default=datetime.now(timezone.utc)
+    )
 
 
-Index("ix_price_points_symbol_timestamp", PricePoints.symbol, PricePoints.timestamp)
 Index(
-    "ix_symbol_averages_symbol_timestamp", SymbolAverage.symbol, SymbolAverage.timestamp
+    "ix_price_points_symbol_timestamp",
+    PricePoints.symbol,
+    PricePoints.timestamp,
+)
+Index(
+    "ix_symbol_averages_symbol_timestamp",
+    SymbolAverage.symbol,
+    SymbolAverage.timestamp,
 )

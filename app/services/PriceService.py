@@ -1,13 +1,16 @@
 from app.models.market import PollingJob, RawPrice, PricePoints
 from app.schemas.price import PollRequest, PollResponse
-from app.services.PriceProviders.YahooFinanceProvider import YahooFinanceProvider
-from app.services.PriceProviders.AlphaVantageProvider import AlphaVantageProvider
+from app.services.PriceProviders.YahooFinanceProvider import (
+    YahooFinanceProvider,
+)
+from app.services.PriceProviders.AlphaVantageProvider import (
+    AlphaVantageProvider,
+)
 from app.services.kafka.KafkaProducer import publish_price_event
 from fastapi import BackgroundTasks, HTTPException
 from datetime import datetime, timezone
 import uuid
 import asyncio
-from app.core.logging import logger as logging
 
 
 class PriceService:
@@ -31,8 +34,12 @@ class PriceService:
         if not provider_instance:
             raise HTTPException(status_code=404, detail="Provider not found")
 
-        raw_data = await asyncio.to_thread(provider_instance.fetch_raw_data, symbol)
-        price_data = await asyncio.to_thread(provider_instance.extract_price, raw_data)
+        raw_data = await asyncio.to_thread(
+            provider_instance.fetch_raw_data, symbol
+        )
+        price_data = await asyncio.to_thread(
+            provider_instance.extract_price, raw_data
+        )
 
         # Store raw data in database
         db_raw_data = RawPrice(

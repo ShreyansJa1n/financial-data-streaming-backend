@@ -1,4 +1,4 @@
-from sqlalchemy import select, desc
+from sqlalchemy import select
 from app.core.Database import SessionLocal
 from app.models.market import PollingJob
 from app.core.logging import logger as logging
@@ -33,13 +33,14 @@ class PollingService:
                         time_difference = datetime.now() - self.last_run[job[2]]
                         if time_difference.total_seconds() >= job[3]:
                             for symbol in job[0].get("symbols", []):
-                                logging.debug(
-                                    f"Running poll: {job[2]} for symbol: {symbol}, provider: {job[1]}"
+                                res = await self._call_own_endpoint(
+                                    symbol, job[1]
                                 )
-                                res = await self._call_own_endpoint(symbol, job[1])
                                 if not res:
                                     logging.info(
-                                        f"Failed to poll {job[2]} for symbol: {symbol}, provider: {job[1]}"
+                                        f"""Failed to poll {job[2]} for
+                                        symbol: {symbol},
+                                        provider: {job[1]}"""
                                     )
 
                             self.last_run[job[2]] = datetime.now()

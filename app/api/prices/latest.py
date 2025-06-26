@@ -22,9 +22,13 @@ async def get_latest_price(
     db: AsyncSession = Depends(get_async_db),
 ) -> Optional[PriceResponse]:
     price_service = PriceService(
-        db=db, redis=request.app.state.redis_service, background_tasks=background_tasks
+        db=db,
+        redis=request.app.state.redis_service,
+        background_tasks=background_tasks,
     )
-    response = await price_service.get_latest_price(symbol=symbol, provider=provider)
+    response = await price_service.get_latest_price(
+        symbol=symbol, provider=provider
+    )
 
     if not response:
         return {"error": "Price not found"}, 404

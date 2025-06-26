@@ -14,12 +14,22 @@ logger.remove()
 
 # Ensure root logger is set to INFO and propagate to loguru
 if settings.DEBUG:
-    logging.basicConfig(handlers=[InterceptHandler()], level=logging.DEBUG, force=True)
+    logging.basicConfig(
+        handlers=[InterceptHandler()], level=logging.DEBUG, force=True
+    )
     logger.level("DEBUG", color="<blue>")
     logger.add(
-        sys.stdout, level="DEBUG", serialize=False, backtrace=True, diagnose=True
+        sys.stdout,
+        level="DEBUG",
+        serialize=False,
+        backtrace=True,
+        diagnose=True,
     )
 else:
-    logging.basicConfig(handlers=[InterceptHandler()], level=logging.INFO, force=True)
+    logging.basicConfig(
+        handlers=[InterceptHandler()], level=logging.INFO, force=True
+    )
     logger.level("INFO", color="<green>")
-    logger.add(sys.stdout, level="INFO", serialize=False, backtrace=True, diagnose=True)
+    logger.add(
+        sys.stdout, level="INFO", serialize=False, backtrace=True, diagnose=True
+    )
