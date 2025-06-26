@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Dict, Any
 
+
 class ProviderInterface(ABC):
 
     @abstractmethod
@@ -10,4 +11,3 @@ class ProviderInterface(ABC):
     @abstractmethod
     def extract_price(self, raw_data: Dict[str, Any]) -> Dict[str, Any]:
         pass
-

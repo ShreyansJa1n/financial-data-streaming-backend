@@ -3,6 +3,7 @@ from app.services.PriceProviders.ProviderInterface import ProviderInterface
 from app.core.config import settings
 import yfinance as yf
 
+
 class YahooFinanceProvider(ProviderInterface):
     def fetch_raw_data(self, symbol: str) -> Dict[str, Any]:
         ticker = yf.Ticker(symbol)

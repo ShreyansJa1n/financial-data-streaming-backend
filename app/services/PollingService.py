@@ -34,14 +34,14 @@ class PollingService:
                         if time_difference.total_seconds() >= job[3]:
                             for symbol in job[0].get("symbols", []):
                                 logging.debug(
-                                        f"Running poll: {job[2]} for symbol: {symbol}, provider: {job[1]}"
-                                    )
+                                    f"Running poll: {job[2]} for symbol: {symbol}, provider: {job[1]}"
+                                )
                                 res = await self._call_own_endpoint(symbol, job[1])
                                 if not res:
                                     logging.info(
                                         f"Failed to poll {job[2]} for symbol: {symbol}, provider: {job[1]}"
                                     )
-                                    
+
                             self.last_run[job[2]] = datetime.now()
 
                 await asyncio.sleep(5)
@@ -55,7 +55,8 @@ class PollingService:
             response = await client.get(
                 "http://localhost:8000/prices/latest/",
                 params={"symbol": symbol, "provider": provider},
-                follow_redirects=True, timeout=5
+                follow_redirects=True,
+                timeout=5,
             )
             data = response.status_code
             if data != 200:

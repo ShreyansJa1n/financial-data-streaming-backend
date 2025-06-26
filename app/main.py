@@ -18,11 +18,13 @@ from confluent_kafka.admin import AdminClient, NewTopic
 redis_service = RedisService()
 consumer_svc = PriceEventConsumer()
 
+
 def run_consumer():
     async def async_consume():
         await consumer_svc.start_ma_consumer()
-                
+
     asyncio.run(async_consume())
+
 
 @asynccontextmanager
 async def lifespan(app):
@@ -76,8 +78,6 @@ async def lifespan(app):
     polling_svc = PollingService()
     polling_task = asyncio.create_task(polling_svc.start_polling())
     app.state.polling_task = polling_task
-
-
 
     yield
     await redis_service.disconnect()

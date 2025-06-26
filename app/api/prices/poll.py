@@ -14,6 +14,8 @@ async def poll_prices(
     db: AsyncSession = Depends(get_async_db),
     request: Request = None,
 ):
-    service = PriceService(db=db, redis=request.app.state.redis_service, background_tasks=background_tasks)
+    service = PriceService(
+        db=db, redis=request.app.state.redis_service, background_tasks=background_tasks
+    )
     job = await service.start_polling_job(req)
     return job

@@ -47,9 +47,8 @@ class PriceEventConsumer:
                     await self._process_price_event(db, event)
                 except Exception as e:
                     logging.error(f"Error while consuming: {e}", exc_info=True)
-                    
+
                 await asyncio.sleep(5)
-                    
 
     def stop_ma_consumer(self):
         """Stop the moving average Kafka consumer and close the connection."""

@@ -1,0 +1,24 @@
+name: CI/CD Pipeline
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements/requirements.txt
+
+      - name: Lint with flake8
+        run: flake8 .
+
+      - name: Test with pytest
+        run: PYTHONPATH=. pytest
+
+      - name: Build Docker image
+        run: docker build -t myapp .
