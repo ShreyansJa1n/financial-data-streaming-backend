@@ -6,7 +6,7 @@ A modern, event-driven backend for real-time financial data polling, analytics, 
 
 ## 🚀 Overview
 
-Blockhouse Backend is a cloud-ready, microservice-inspired platform for:
+Financial Data Streaming Backend is a cloud-ready, microservice-inspired platform for:
 
 - Polling and aggregating financial market data from multiple providers (Yahoo Finance, Alpha Vantage, etc.)
 - Real-time price event streaming and analytics via Kafka
@@ -61,19 +61,19 @@ FastAPI
 ### 1. Clone the repository
 
 ```sh
-git clone https://github.com/shreyansja1n/blockhouse-backend.git
-cd blockhouse-backend
+git clone https://github.com/ShreyansJa1n/financial-data-streaming-backend
+cd financial-data-streaming-backend
 ```
 
 ### 2. Create a `.env` file
 
 ```env
-DATABASE_URL=postgresql+asyncpg://blockhouse:blockhouse@postgres:5432/blockhouse_db
+DATABASE_URL=postgresql+asyncpg://backend_db:backend_db@postgres:5432/backend_db_db
 REDIS_URL=redis://redis:6379/0
 ALPHA_VANTAGE_API_KEY=your_alpha_vantage_key
-POSTGRES_USER=blockhouse
-POSTGRES_PASSWORD=blockhouse
-POSTGRES_DB=blockhouse_db
+POSTGRES_USER=backend_db
+POSTGRES_PASSWORD=backend_db
+POSTGRES_DB=backend_db
 KAFKA_BOOTSTRAP_SERVERS=kafka:9092
 ```
 
