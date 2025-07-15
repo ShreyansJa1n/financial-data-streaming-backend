@@ -1,4 +1,4 @@
-# Blockhouse Backend
+# Financial Data Streaming Backend
 
 A modern, event-driven backend for real-time financial data polling, analytics, and streaming, built with FastAPI, async SQLAlchemy, Kafka, Redis, and PostgreSQL. Designed for speed, scalability, and developer happiness.
 
