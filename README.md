@@ -68,7 +68,7 @@ cd financial-data-streaming-backend
 ### 2. Create a `.env` file
 
 ```env
-DATABASE_URL=postgresql+asyncpg://backend_db:backend_db@postgres:5432/backend_db_db
+DATABASE_URL=postgresql+asyncpg://backend_db:backend_db@postgres:5432/backend_db
 REDIS_URL=redis://redis:6379/0
 ALPHA_VANTAGE_API_KEY=your_alpha_vantage_key
 POSTGRES_USER=backend_db
